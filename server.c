@@ -142,30 +142,10 @@ void handle_request(struct server_app *app, int client_socket) {
     char *request = malloc(strlen(buffer) + 1);
     strcpy(request, buffer);
 
-    //print request
-    //printf("%s", request);
-
     // TODO: Parse the header and extract essential fields, e.g. file name
     // Hint: if the requested path is "/" (root), default to index.html
-    char *file_name = "index.html";
+    char file_name[] = "index.html";
 
-    //file name can have alphabet, periods, spaces, percentages
-    char *tok = strtok(request, " ");
-
-    tok = strtok(NULL, "/");
-
-    // url formatted as url HTTP    
-    char *url = tok;
-    // chops off HTTP the end
-    url[strlen(url)-5] = '\0';
-
-    if(url[0] != '\0'){
-        file_name = url;
-    } 
-    //printf("file_name: %s\n", file_name);
-
-
-    
     // TODO: Implement proxy and call the function under condition
     // specified in the spec
     // if (need_proxy(...)) {
