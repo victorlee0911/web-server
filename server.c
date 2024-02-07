@@ -187,11 +187,27 @@ void serve_local_file(int client_socket, const char *path) {
     // (When the requested file does not exist):
     // * Generate a correct response
     char *response;
-    if(strchr(path, '.') == NULL || strcmp(strchr(path, '.'), ".html") == 0 || strcmp(strchr(path, '.'), ".txt")  == 0|| strcmp(strchr(path, '.'), ".jpg") == 0){
-            printf("%s\n", strchr(path, '.'));
+    char *ext = strchr(path, '.');
+    if(ext == NULL){
+        response = "HTTP/1.0 200 OK\r\n"
+                        "Content-Type: application/octet-stream\r\n"
+                        "Content-Length: 15\r\n"
+                        "\r\n"
+                        "Sample response";
+    } 
 
-            response = "HTTP/1.0 200 OK\r\n"
+    else if(strcmp(ext, ".html") == 0 || strcmp(ext, ".txt")  == 0){
+        response = "HTTP/1.0 200 OK\r\n"
                       "Content-Type: text/plain; charset=UTF-8\r\n"
+                      "Content-Length: 15\r\n"
+                      "\r\n"
+                      "Sample response";
+    }
+
+    else if(strcmp(ext, ".jpg") == 0){
+        //printf("%s\n", strchr(path, '.'));
+         response = "HTTP/1.0 200 OK\r\n"
+                      "Content-Type: image/jpg\r\n"
                       "Content-Length: 15\r\n"
                       "\r\n"
                       "Sample response";
