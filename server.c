@@ -186,12 +186,20 @@ void serve_local_file(int client_socket, const char *path) {
     // * Also send file content
     // (When the requested file does not exist):
     // * Generate a correct response
+    char *response;
+    if(strchr(path, '.') == NULL || strcmp(strchr(path, '.'), ".html") == 0 || strcmp(strchr(path, '.'), ".txt")  == 0|| strcmp(strchr(path, '.'), ".jpg") == 0){
+            printf("%s\n", strchr(path, '.'));
 
-    char response[] = "HTTP/1.0 200 OK\r\n"
+            response = "HTTP/1.0 200 OK\r\n"
                       "Content-Type: text/plain; charset=UTF-8\r\n"
                       "Content-Length: 15\r\n"
                       "\r\n"
                       "Sample response";
+    }   
+
+    else{
+        response = "HTTP/1.0 400 Bad Request\r\n";
+    }
 
     send(client_socket, response, strlen(response), 0);
 }
