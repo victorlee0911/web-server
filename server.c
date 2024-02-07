@@ -164,14 +164,18 @@ void handle_request(struct server_app *app, int client_socket) {
     } 
     //printf("file_name: %s\n", file_name);
 
-
-    
     // TODO: Implement proxy and call the function under condition
     // specified in the spec
     // if (need_proxy(...)) {
     //    proxy_remote_file(app, client_socket, file_name);
     // } else {
-    serve_local_file(client_socket, file_name);
+    char *ext = strrchr(file_name, '.');
+    if(ext != NULL && strcmp(ext, ".ts") == 0){
+        proxy_remote_file(app, client_socket, file_name);
+    }
+    else {
+        serve_local_file(client_socket, file_name);
+    }
     //}
 }
 
@@ -229,6 +233,7 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     // Bonus:
     // * When connection to the remote server fail, properly generate
     // HTTP 502 "Bad Gateway" response
+    printf("proxy_remote_file");
 
     char response[] = "HTTP/1.0 501 Not Implemented\r\n\r\n";
     send(client_socket, response, strlen(response), 0);
