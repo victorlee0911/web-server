@@ -142,10 +142,30 @@ void handle_request(struct server_app *app, int client_socket) {
     char *request = malloc(strlen(buffer) + 1);
     strcpy(request, buffer);
 
+    //print request
+    //printf("%s", request);
+
     // TODO: Parse the header and extract essential fields, e.g. file name
     // Hint: if the requested path is "/" (root), default to index.html
-    char file_name[] = "index.html";
+    char *file_name = "index.html";
 
+    //file name can have alphabet, periods, spaces, percentages
+    char *tok = strtok(request, " ");
+
+    tok = strtok(NULL, "/");
+
+    // url formatted as url HTTP    
+    char *url = tok;
+    // chops off HTTP the end
+    url[strlen(url)-5] = '\0';
+
+    if(url[0] != '\0'){
+        file_name = url;
+    } 
+    //printf("file_name: %s\n", file_name);
+
+
+    
     // TODO: Implement proxy and call the function under condition
     // specified in the spec
     // if (need_proxy(...)) {
@@ -166,12 +186,36 @@ void serve_local_file(int client_socket, const char *path) {
     // * Also send file content
     // (When the requested file does not exist):
     // * Generate a correct response
+    char *response;
+    char *ext = strchr(path, '.');
+    if(ext == NULL){
+        response = "HTTP/1.0 200 OK\r\n"
+                        "Content-Type: application/octet-stream\r\n"
+                        "Content-Length: 15\r\n"
+                        "\r\n"
+                        "Sample response";
+    } 
 
-    char response[] = "HTTP/1.0 200 OK\r\n"
+    else if(strcmp(ext, ".html") == 0 || strcmp(ext, ".txt")  == 0){
+        response = "HTTP/1.0 200 OK\r\n"
                       "Content-Type: text/plain; charset=UTF-8\r\n"
                       "Content-Length: 15\r\n"
                       "\r\n"
                       "Sample response";
+    }
+
+    else if(strcmp(ext, ".jpg") == 0){
+        //printf("%s\n", strchr(path, '.'));
+         response = "HTTP/1.0 200 OK\r\n"
+                      "Content-Type: image/jpg\r\n"
+                      "Content-Length: 15\r\n"
+                      "\r\n"
+                      "Sample response";
+    }   
+
+    else{
+        response = "HTTP/1.0 400 Bad Request\r\n";
+    }
 
     send(client_socket, response, strlen(response), 0);
 }
