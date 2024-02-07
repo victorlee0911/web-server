@@ -187,7 +187,7 @@ void serve_local_file(int client_socket, const char *path) {
     // (When the requested file does not exist):
     // * Generate a correct response
     char *response;
-    char *ext = strchr(path, '.');
+    char *ext = strrchr(path, '.');     //finds last . because there can be periods in the path
     if(ext == NULL){
         response = "HTTP/1.0 200 OK\r\n"
                         "Content-Type: application/octet-stream\r\n"
