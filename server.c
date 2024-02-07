@@ -210,14 +210,15 @@ void serve_local_file(int client_socket, const char *path) {
 
     else{
         fseek(fp, 0L, SEEK_END); 
-        long int file_size = ftell(fp) + 1; 
-        char *file_content = (char*)malloc(file_size);
+        long int file_size = ftell(fp); 
+        char *file_content = (char*)malloc(file_size + 1);
         fseek(fp, 0, SEEK_SET);
         fread(file_content, file_size, 1, fp);
+        file_content[file_size] = '\0';
         fclose(fp);
         snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: %ld\r\n\r\n", file_size+1);
         send(client_socket, response, strlen(response), 0);
-        send(client_socket, file_content, file_size, 0);         
+        send(client_socket, file_content, file_size + 1, 0);         
     }
    
     }
