@@ -190,7 +190,7 @@ void serve_local_file(int client_socket, const char *path) {
     // * Also send file content
     // (When the requested file does not exist):
     // * Generate a correct response
-    char *response;
+    char *response = (char*)malloc(1000);
     char *ext = strrchr(path, '.');     //finds last . because there can be periods in the path
     if(ext == NULL){
         response = "HTTP/1.0 200 OK\r\n"
@@ -201,27 +201,53 @@ void serve_local_file(int client_socket, const char *path) {
     } 
 
     else if(strcmp(ext, ".html") == 0 || strcmp(ext, ".txt")  == 0){
-        response = "HTTP/1.0 200 OK\r\n"
-                      "Content-Type: text/plain; charset=UTF-8\r\n"
-                      "Content-Length: 15\r\n"
-                      "\r\n"
-                      "Sample response";
+     FILE*  fp = fopen(path, "r"); 
+  
+    // checking if the file exist or not 
+    if (fp == NULL) { 
+         response = "HTTP/1.0 404 Not Found\r\n";
+    } 
+
+    else{
+        fseek(fp, 0L, SEEK_END); 
+        long int file_size = ftell(fp) + 1; 
+        char *file_content = (char*)malloc(file_size);
+        fseek(fp, 0, SEEK_SET);
+        fread(file_content, file_size, 1, fp);
+        fclose(fp);
+        snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: %ld\r\n\r\n", file_size+1);
+        send(client_socket, response, strlen(response), 0);
+        send(client_socket, file_content, file_size, 0);         
+    }
+   
     }
 
     else if(strcmp(ext, ".jpg") == 0){
-        //printf("%s\n", strchr(path, '.'));
-         response = "HTTP/1.0 200 OK\r\n"
-                      "Content-Type: image/jpg\r\n"
-                      "Content-Length: 15\r\n"
-                      "\r\n"
-                      "Sample response";
+    FILE*  fp = fopen(path, "r"); 
+  
+    if (fp == NULL) { 
+         response = "HTTP/1.0 404 Not Found\r\n";
+    } 
+
+    else{
+        fseek(fp, 0L, SEEK_END); 
+        long int file_size = ftell(fp) + 1; 
+        char *file_content = (char*)malloc(file_size);
+        fseek(fp, 0, SEEK_SET);
+        fread(file_content, file_size, 1, fp);
+        //printf("%s\nFile size:%ld\n", file_content, strlen(file_content));
+        fclose(fp);
+        snprintf(response,  100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: %ld\r\n\r\n", file_size + 1); 
+        send(client_socket, response, strlen(response), 0);
+        send(client_socket, file_content, file_size, 0);     
+    }
     }   
 
     else{
         response = "HTTP/1.0 400 Bad Request\r\n";
     }
 
-    send(client_socket, response, strlen(response), 0);
+    //send(client_socket, response, strlen(response), 0);
 }
 
 void proxy_remote_file(struct server_app *app, int client_socket, const char *request) {
@@ -233,7 +259,6 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     // Bonus:
     // * When connection to the remote server fail, properly generate
     // HTTP 502 "Bad Gateway" response
-    printf("proxy_remote_file");
 
     char response[] = "HTTP/1.0 501 Not Implemented\r\n\r\n";
     send(client_socket, response, strlen(response), 0);
