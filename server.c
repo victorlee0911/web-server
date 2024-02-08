@@ -208,7 +208,7 @@ void serve_local_file(int client_socket, const char *path) {
             fclose(fp);
             snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %ld\r\n\r\n", file_size + 1);
             send(client_socket, response, strlen(response), 0);
-            send(client_socket, file_content, file_size, 0);
+            send(client_socket, file_content, file_size + 1, 0);
 
         // response = "HTTP/1.0 200 OK\r\n"
         //                 "Content-Type: application/octet-stream\r\n"
