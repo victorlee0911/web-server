@@ -200,16 +200,18 @@ void serve_local_file(int client_socket, const char *path) {
             response = "HTTP/1.0 404 Not Found\r\n";
         } 
         
-        fseek(fp, 0L, SEEK_END); 
+        else {
+            fseek(fp, 0L, SEEK_END); 
             long int file_size = ftell(fp); 
             char *file_content = (char*)malloc(file_size);
             fseek(fp, 0, SEEK_SET);
             fread(file_content, file_size, 1, fp);
             fclose(fp);
-            snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %ld\r\n\r\n", file_size + 1);
+            snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %ld\r\n\r\n", file_size);
             send(client_socket, response, strlen(response), 0);
-            send(client_socket, file_content, file_size + 1, 0);
-
+            send(client_socket, file_content, file_size, 0);
+            free(file_content);
+        }
         // response = "HTTP/1.0 200 OK\r\n"
         //                 "Content-Type: application/octet-stream\r\n"
         //                 "Content-Length: 15\r\n"
@@ -217,7 +219,7 @@ void serve_local_file(int client_socket, const char *path) {
         //                 "Sample response";
     } 
 
-    else if(strcmp(ext, ".html") == 0 || strcmp(ext, ".txt")  == 0){
+    else if(strcmp(ext, ".html") == 0){
         FILE*  fp = fopen(path, "r"); 
     
         // checking if the file exist or not 
@@ -233,9 +235,32 @@ void serve_local_file(int client_socket, const char *path) {
             fread(file_content, file_size, 1, fp);
             file_content[file_size] = '\0';
             fclose(fp);
-            snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: %ld\r\n\r\n", file_size+1);
+            snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: %ld\r\n\r\n", file_size);
             send(client_socket, response, strlen(response), 0);
-            send(client_socket, file_content, file_size + 1, 0);      
+            send(client_socket, file_content, file_size, 0);
+            free(file_content);      
+        }
+    }
+    else if(strcmp(ext, ".txt")  == 0){
+        FILE*  fp = fopen(path, "r"); 
+    
+        // checking if the file exist or not 
+        if (fp == NULL) { 
+            response = "HTTP/1.0 404 Not Found\r\n";
+        } 
+
+        else {
+            fseek(fp, 0L, SEEK_END); 
+            long int file_size = ftell(fp); 
+            char *file_content = (char*)malloc(file_size + 1);
+            fseek(fp, 0, SEEK_SET);
+            fread(file_content, file_size, 1, fp);
+            file_content[file_size] = '\0';
+            fclose(fp);
+            snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Length: %ld\r\nX-Content-Type-Options: nosniff\r\n\r\n", file_size);
+            send(client_socket, response, strlen(response), 0);
+            send(client_socket, file_content, file_size, 0); 
+            free(file_content);     
         }
     }
 
@@ -253,9 +278,10 @@ void serve_local_file(int client_socket, const char *path) {
             fseek(fp, 0, SEEK_SET);
             fread(file_content, file_size, 1, fp);
             fclose(fp);
-            snprintf(response,  100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: %ld\r\n\r\n", file_size + 1); 
+            snprintf(response,  100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: %ld\r\n\r\n", file_size); 
             send(client_socket, response, strlen(response), 0);
             send(client_socket, file_content, file_size, 0);     
+            free(file_content);
         }
     }   
 
