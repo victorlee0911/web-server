@@ -38,6 +38,9 @@ void handle_request(struct server_app *app, int client_socket);
 void serve_local_file(int client_socket, const char *path);
 void proxy_remote_file(struct server_app *app, int client_socket, const char *path);
 
+//helper function
+void decode_filepath_encoding(char *str);
+
 // The main function is provided and no change is needed
 int main(int argc, char *argv[])
 {
@@ -164,6 +167,9 @@ void handle_request(struct server_app *app, int client_socket) {
     } 
     //printf("file_name: %s\n", file_name);
 
+    //COMMENT OUT WHEN TESTING LOCALLY
+    decode_filepath_encoding(file_name);
+
     // TODO: Implement proxy and call the function under condition
     // specified in the spec
     // if (need_proxy(...)) {
@@ -177,6 +183,22 @@ void handle_request(struct server_app *app, int client_socket) {
         serve_local_file(client_socket, file_name);
     }
     //}
+}
+
+void decode_filepath_encoding(char *str){
+    int len = strlen(str);
+    for(int i=0; i < len; i++){
+        if ((str[i] == '%' && i < len-2) && str[i+1] == '2'){
+            if (str[i+2] == '0'){   //space
+                str[i] = ' ';
+            } 
+            else if (str[i+2] == '5'){
+                str[i] = '%';
+            }
+            memmove(&str[i+1], &str[i+3], len-i-2);
+            len -= 2;
+        }
+    }
 }
 
 void serve_local_file(int client_socket, const char *path) {
