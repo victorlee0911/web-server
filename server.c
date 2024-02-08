@@ -323,6 +323,40 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     // * When connection to the remote server fail, properly generate
     // HTTP 502 "Bad Gateway" response
 
-    char response[] = "HTTP/1.0 501 Not Implemented\r\n\r\n";
-    send(client_socket, response, strlen(response), 0);
+    printf("host: %s", app->remote_host);
+    printf("port: %hu", app->remote_port);
+
+    struct sockaddr_in remote_addr;
+    remote_addr.sin_family = AF_INET;
+    inet_pton(AF_INET, app->remote_host, &remote_addr.sin_addr);
+    remote_addr.sin_port = htons(app->remote_port); 
+
+    int server_socket, bytes_recv;
+    char buffer[BUFFER_SIZE];
+
+    if (server_socket = socket(AF_INET, SOCK_STREAM, 0) == -1) {
+        perror("server socket failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (connect(server_socket, (struct sockaddr *)&remote_addr, sizeof(remote_addr)) == -1) {
+        close(server_socket);
+        char response[] = "HTTP/1.0 502 Bad Gateway\r\n\r\n";
+        send(client_socket, response, strlen(response), 0);
+        return;
+    }
+
+    if (send(server_socket, request, strlen(request), 0) == -1) {
+        close(server_socket);
+        perror("send to server failed");
+        exit(EXIT_FAILURE);
+    }
+
+    //receive data in buffer and pass to client
+    
+
+    close(server_socket);
+
+    //char response[] = "HTTP/1.0 501 Not Implemented\r\n\r\n";
+    //send(client_socket, response, strlen(response), 0);
 }
