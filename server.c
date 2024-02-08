@@ -167,7 +167,6 @@ void handle_request(struct server_app *app, int client_socket) {
     } 
     //printf("file_name: %s\n", file_name);
 
-    //COMMENT OUT WHEN TESTING LOCALLY
     decode_filepath_encoding(file_name);
 
     // TODO: Implement proxy and call the function under condition
