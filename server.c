@@ -338,8 +338,11 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
 
     int server_socket, bytes_recv;
     char buffer[BUFFER_SIZE];
+    char *response = (char*)malloc(1000);
 
-    if (server_socket = socket(AF_INET, SOCK_STREAM, 0) == -1) {
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (server_socket == -1) {
         perror("server socket failed");
         exit(EXIT_FAILURE);
     }
@@ -358,7 +361,11 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     }
 
     //receive data in buffer and pass to client
-    
+    while ((bytes_recv = recv(server_socket, buffer, sizeof(buffer), 0)) > 0) {
+        snprintf(response,  100 + sizeof(buffer), "HTTP/1.0 200 OK\r\nContent-Type: video/mpeg\r\nContent-Length: %ld\r\n\r\n", sizeof(buffer));
+        send(client_socket, response, strlen(response), 0);
+        send(client_socket, buffer, bytes_recv, 0);
+    }
 
     close(server_socket);
 
