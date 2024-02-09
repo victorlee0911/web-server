@@ -214,7 +214,7 @@ void serve_local_file(int client_socket, const char *path) {
     char *response = (char*)malloc(1000);
     char *ext = strrchr(path, '.');     //finds last . because there can be periods in the path
     if(ext == NULL){
-        FILE*  fp = fopen(path, "r"); 
+        FILE*  fp = fopen(path, "rb"); 
     
         // checking if the file exist or not 
         if (fp == NULL) { 
