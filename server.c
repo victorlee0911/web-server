@@ -313,9 +313,9 @@ void serve_local_file(int client_socket, const char *path) {
 
     else {
         response = "HTTP/1.0 400 Bad Request\r\n";
+        send(client_socket, response, strlen(response), 0);
     }
 
-    //send(client_socket, response, strlen(response), 0);
 }
 
 void proxy_remote_file(struct server_app *app, int client_socket, const char *request) {
