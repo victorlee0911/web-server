@@ -198,7 +198,6 @@ void decode_filepath_encoding(char *str){
             len -= 2;
         }
     }
-    //printf("Filename:%s\n", str);
 }
 
 void serve_local_file(int client_socket, const char *path) {
@@ -290,7 +289,7 @@ void serve_local_file(int client_socket, const char *path) {
     }
 
     else if(strcmp(ext, ".jpg") == 0){
-        FILE*  fp = fopen(path, "r"); 
+        FILE*  fp = fopen(path, "rb"); 
     
         if (fp == NULL) { 
             response = "HTTP/1.0 404 Not Found\r\n";
@@ -299,15 +298,15 @@ void serve_local_file(int client_socket, const char *path) {
 
         else{
             fseek(fp, 0L, SEEK_END); 
-            long int file_size = ftell(fp) + 1; 
+            long int file_size = ftell(fp); 
             char *file_content = (char*)malloc(file_size);
             fseek(fp, 0, SEEK_SET);
             fread(file_content, file_size, 1, fp);
             file_content[file_size] = '\0';
             fclose(fp);
-            snprintf(response,  100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: image/jpeg\r\nContent-Length: %ld\r\n\r\n", file_size + 1); 
+            snprintf(response,  100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: image/jpeg\r\nContent-Length: %ld\r\n\r\n", file_size); 
             send(client_socket, response, strlen(response), 0);
-            send(client_socket, file_content, file_size + 1, 0);     
+            send(client_socket, file_content, file_size, 0);     
             free(file_content);
         }
     }   
