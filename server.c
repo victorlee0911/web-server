@@ -198,6 +198,7 @@ void decode_filepath_encoding(char *str){
             len -= 2;
         }
     }
+    //printf("Filename:%s\n", str);
 }
 
 void serve_local_file(int client_socket, const char *path) {
@@ -219,6 +220,7 @@ void serve_local_file(int client_socket, const char *path) {
         // checking if the file exist or not 
         if (fp == NULL) { 
             response = "HTTP/1.0 404 Not Found\r\n";
+            send(client_socket, response, strlen(response), 0);
         } 
         
         else {
@@ -246,6 +248,7 @@ void serve_local_file(int client_socket, const char *path) {
         // checking if the file exist or not 
         if (fp == NULL) { 
             response = "HTTP/1.0 404 Not Found\r\n";
+            send(client_socket, response, strlen(response), 0);
         } 
 
         else {
@@ -268,6 +271,7 @@ void serve_local_file(int client_socket, const char *path) {
         // checking if the file exist or not 
         if (fp == NULL) { 
             response = "HTTP/1.0 404 Not Found\r\n";
+            send(client_socket, response, strlen(response), 0);
         } 
 
         else {
@@ -290,6 +294,7 @@ void serve_local_file(int client_socket, const char *path) {
     
         if (fp == NULL) { 
             response = "HTTP/1.0 404 Not Found\r\n";
+            send(client_socket, response, strlen(response), 0);
         } 
 
         else{
