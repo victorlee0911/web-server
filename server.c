@@ -261,7 +261,7 @@ void serve_local_file(int client_socket, const char *path) {
             snprintf(response, 100 + file_size, "HTTP/1.0 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: %ld\r\n\r\n", file_size);
             send(client_socket, response, strlen(response), 0);
             send(client_socket, file_content, file_size, 0);
-            free(file_content);      
+            free(file_content); 
         }
     }
     else if(strcmp(ext, ".txt")  == 0){
@@ -354,31 +354,10 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
         return;
     }
 
-    printf("Yoohoo");
-
-    FILE* fp = fopen(request, "rb");
-    // checking if the file exist or not 
-    if (fp == NULL) { 
-        response = "HTTP/1.0 404 Not Found\r\n";
-        send(client_socket, response, strlen(response), 0);
-    }
-
-    else {
-        fseek(fp, 0L, SEEK_END); 
-        long int file_size = ftell(fp); 
-        char *file_content = (char*)malloc(file_size);
-        fseek(fp, 0, SEEK_SET);
-        fread(file_content, file_size, 1, fp);
-        file_content[file_size] = '\0';
-        fclose(fp);
-
-        snprintf(request, 100 + sizeof(request), 
-            "GET %s HTTP/1.0\r\n"
-            "Host: %s\r\n"
-            "Connection: close\r\n", request, app->remote_host);
-
-        free(file_content);
-    }
+    snprintf(request, 100 + sizeof(request), 
+        "GET %s HTTP/1.0\r\n"
+        "Host: %s:%d\r\n"
+        "Connection: close\r\n", request, app->remote_host, app->remote_port);
 
     if (send(server_socket, request, strlen(request), 0) == -1) {
         close(server_socket);
@@ -386,7 +365,6 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
         exit(EXIT_FAILURE);
     }
 
-    printf("What");
 
     //receive data in buffer and pass to client
     while ((bytes_recv = recv(server_socket, buffer, sizeof(buffer)-1, 0)) > 0) {
@@ -398,7 +376,4 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     }
 
     close(server_socket);
-
-    //char response[] = "HTTP/1.0 501 Not Implemented\r\n\r\n";
-    //send(client_socket, response, strlen(response), 0);
 }
