@@ -363,7 +363,7 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
         "Host: %s:%d\r\n"
         "Connection: close\r\n\r\n", request, app->remote_host, app->remote_port);
 
-    printf("\nRequest: \n %s \n", http_req);
+    //printf("\nRequest: \n %s \n", http_req);
     
    
     if (send(server_socket, http_req, strlen(http_req), 0) == -1) {
@@ -379,7 +379,9 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     //send(client_socket, response, strlen(response), 0);
 
     while ((bytes_recv = recv(server_socket, buffer, sizeof(buffer)-1, 0)) > 0) {
-        if(send(client_socket, buffer, sizeof(buffer), 0) == -1){
+        buffer[bytes_recv] = '\0';
+        //printf("%s", buffer);
+        if(send(client_socket, buffer, bytes_recv, 0) == -1){
             close(server_socket);
             printf("proxy send to client failed");
             perror("proxy send to client failed");
