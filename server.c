@@ -332,13 +332,17 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     printf("port: %hu", app->remote_port);
 
     struct sockaddr_in remote_addr;
+    
     remote_addr.sin_family = AF_INET;
-    inet_pton(AF_INET, app->remote_host, &remote_addr.sin_addr);
+    remote_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    //inet_pton(AF_INET, app->remote_host, &remote_addr.sin_addr);
     remote_addr.sin_port = htons(app->remote_port); 
 
     int server_socket, bytes_recv;
     char buffer[BUFFER_SIZE];
-    char *response = (char*)malloc(1000);
+    char *response;
+    char *response_body;
+    char http_req[1024];
 
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -354,26 +358,36 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
         return;
     }
 
-    snprintf(request, 100 + sizeof(request), 
+    snprintf(http_req, sizeof(http_req), 
         "GET %s HTTP/1.0\r\n"
         "Host: %s:%d\r\n"
-        "Connection: close\r\n", request, app->remote_host, app->remote_port);
+        "Connection: close\r\n\r\n", request, app->remote_host, app->remote_port);
 
-    if (send(server_socket, request, strlen(request), 0) == -1) {
+    printf("\nRequest: \n %s \n", http_req);
+    
+   
+    if (send(server_socket, http_req, strlen(http_req), 0) == -1) {
         close(server_socket);
         perror("send to server failed");
-        exit(EXIT_FAILURE);
+        return;
     }
 
 
     //receive data in buffer and pass to client
+    //snprintf(response, 74, "HTTP/1.0 200 OK\r\nContent-Type: video/mpeg\r\nX-Content-Type-Options: nosniff\r\nTransfer-Encoding: chunked\r\n\r\n");
+    //printf("%s", response);
+    //send(client_socket, response, strlen(response), 0);
+
     while ((bytes_recv = recv(server_socket, buffer, sizeof(buffer)-1, 0)) > 0) {
-        snprintf(response,  100 + sizeof(buffer), "HTTP/1.0 200 OK\r\nContent-Type: video/mpeg\r\nContent-Length: %ld\r\n\r\n", sizeof(buffer));
-        printf("%s", response);
-        buffer[bytes_recv] = '\0';
-        send(client_socket, response, strlen(response), 0);
-        send(client_socket, buffer, sizeof(buffer), 0);
+        if(send(client_socket, buffer, sizeof(buffer), 0) == -1){
+            close(server_socket);
+            printf("proxy send to client failed");
+            perror("proxy send to client failed");
+            return;
+        }
     }
+    
+    
 
     close(server_socket);
 }
