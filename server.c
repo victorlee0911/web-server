@@ -334,8 +334,8 @@ void proxy_remote_file(struct server_app *app, int client_socket, const char *re
     struct sockaddr_in remote_addr;
     
     remote_addr.sin_family = AF_INET;
-    remote_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    //inet_pton(AF_INET, app->remote_host, &remote_addr.sin_addr);
+    remote_addr.sin_addr.s_addr = inet_addr(app->remote_host);
+    //remote_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     remote_addr.sin_port = htons(app->remote_port); 
 
     int server_socket, bytes_recv;
